@@ -26,7 +26,26 @@ input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);borde
 .card{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fbfdfe}.big{font-size:2.25rem;font-weight:900}.icon{font-size:3rem}
 .preview{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fff;margin-top:16px}.class-code{font-size:2.3rem;font-weight:900;letter-spacing:.12em;color:var(--accent2)}
 .compare{overflow-x:auto;margin-top:14px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:.85rem;color:var(--muted)}
-@media print{body{background:#fff}.tabs,header,.no-print,#studentForm{display:none!important}.wrap{padding:0;width:100%}.panel{box-shadow:none;border:0;padding:0}.view{display:none!important}#studentView.active{display:block!important}#reportPreview{display:block!important;border:0;padding:0}@page{size:letter;margin:.55in}}
+@media print{
+body{background:#fff}
+.tabs,header,.no-print{display:none!important}
+.wrap{padding:0;width:100%}
+.panel{box-shadow:none;border:0;padding:0}
+.view{display:none!important}
+body.print-student #studentView{display:block!important}
+body.print-student #studentForm{display:none!important}
+body.print-student #reportPreview{display:block!important;border:0;padding:0;margin:0}
+body.print-class #teacherView{display:block!important}
+body.print-class #teacherView>.grid{display:none!important}
+body.print-class #dashboard{display:block!important}
+body.print-class #dashboard .notice{display:block!important;border:0;padding:0 0 14px;margin:0;background:#fff}
+body.print-class .compare{overflow:visible;margin-top:10px}
+body.print-class table{min-width:0;width:100%;font-size:10pt}
+body.print-class th,body.print-class td{padding:7px;border:1px solid #bbb}
+body.print-class th{color:#000;background:#f3f3f3}
+body.print-class .class-code{font-size:16pt;letter-spacing:.08em;color:#000}
+@page{size:letter;margin:.45in}
+}
 </style>
 </head>
 <body>
@@ -110,7 +129,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);borde
 
 <script>
 /* Paste your deployed Google Apps Script Web App URL here. */
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjyWBMnwGwR6Rc0X2kdRtz5Y186vXcJ69Sk-w49DiF0o26ZfA1TYE0M_LxJKgi9CQK/exec";
+const APP_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
 const $=id=>document.getElementById(id);
 let selected=null;
@@ -164,7 +183,11 @@ function render(){
  $("tomDetails").textContent="Max precipitation chance "+(w.daily.precipitation_probability_max[1]??0)+"%";
  show("reportPreview",true);$("reportPreview").scrollIntoView({behavior:"smooth",block:"start"});
 }
-$("print").addEventListener("click",()=>window.print());
+$("print").addEventListener("click",()=>{
+ document.body.classList.remove("print-class");
+ document.body.classList.add("print-student");
+ window.print();
+});
 $("restart").addEventListener("click",()=>{selected=null;show("reportPreview",false);show("choices",false);$("citySearch").value="";$("prediction").value="";show("submitStatus",false)});
 
 $("submit").addEventListener("click",async()=>{
@@ -201,7 +224,14 @@ $("clearClass").addEventListener("click",async()=>{
  if(!confirm("Clear every student report from this class? This cannot be undone."))return;
  try{await backend({action:"clearClass",classCode:teacher.code,pin:teacher.pin});await loadDash()}catch(e){alert(e.message)}
 });
-$("printClass").addEventListener("click",()=>window.print());
+$("printClass").addEventListener("click",()=>{
+ document.body.classList.remove("print-student");
+ document.body.classList.add("print-class");
+ window.print();
+});
+window.addEventListener("afterprint",()=>{
+ document.body.classList.remove("print-student","print-class");
+});
 </script>
 </body>
 </html>
